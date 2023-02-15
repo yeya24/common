@@ -2,10 +2,15 @@ package middleware
 
 import (
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"net/http"
 
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
-	"github.com/opentracing/opentracing-go"
+)
+
+const (
+	// ForceTracingHeader is a request header name that forces tracing sampling.
+	ForceTracingHeader = "X-AMP-Force-Tracing"
 )
 
 // Dummy dependency to enforce that we have a nethttp version newer
@@ -41,6 +46,16 @@ func (t Tracer) Wrap(next http.Handler) http.Handler {
 			if t.SourceIPs != nil {
 				sp.SetTag("sourceIPs", t.SourceIPs.Get(r))
 			}
+		}),
+		nethttp.MWStartSpanOptionsFunc(func(r *http.Request) []opentracing.StartSpanOption {
+			var opts []opentracing.StartSpanOption
+			val := r.Header.Get(ForceTracingHeader)
+			if val != "" {
+				opts = []opentracing.StartSpanOption{
+					opentracing.Tag{Key: "thanos.force_tracing", Value: "true"},
+				}
+			}
+			return opts
 		}),
 	}
 

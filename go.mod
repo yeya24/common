@@ -36,3 +36,5 @@ require (
 	google.golang.org/grpc v1.47.0
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+replace github.com/opentracing-contrib/go-stdlib v0.0.0-20190519235532-cf7a6c988dc9 => github.com/yeya24/go-stdlib v0.0.0-20230215015847-bdc303c73e10
